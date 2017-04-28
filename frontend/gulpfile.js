@@ -178,3 +178,23 @@ gulp.task('default', () => {
     runSequence(['clean', 'wiredep'], 'build', resolve);
   });
 });
+
+gulp.task('deploy', ['default'], () => {
+  // create a new publisher
+  const publisher = $.awspublish.create({
+    params: {
+      'Bucket': 'tamcounter.com'
+    }
+  });
+
+  // define custom headers
+  const headers = {
+    // 'Cache-Control': 'max-age=315360000, no-transform, public'
+  };
+
+  return gulp.src('dist/**/*.*')
+    .pipe(publisher.publish(headers))
+    .pipe(publisher.sync())
+    .pipe(publisher.cache())
+    .pipe($.awspublish.reporter());
+});
