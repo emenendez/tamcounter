@@ -32,9 +32,6 @@ def get_unique_activities(client, athlete_id, segments, extra_activity_ids=[]):
     return activities
 
 
-# For authentication
-# authorize_url = client.authorization_url(client_id=os.getenv('STRAVA_CLIENT_ID'), redirect_uri='http://localhost:8282/authorized')
-# Have the user click the authorization URL, a 'code' param will be added to the redirect_uri
 def get_activity_counts(event, context):
     client = Client()
     usersTable = boto3.resource('dynamodb').Table('usersTable')
@@ -58,10 +55,10 @@ def get_activity_counts(event, context):
         }
         usersTable.put_item(Item=item)
 
-    if 'athlete_id' in request:
+    if 'athlete' in request:
         item = usersTable.get_item(
             Key={
-               'id': event.body,
+               'id': request['athlete'],
             }
         )['Item']
         client.access_token = item['access_token']
