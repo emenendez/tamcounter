@@ -19,5 +19,9 @@ var/
 # Node
 node_modules/
 
+# Python requirements
+requirements/
+
 # Serverless directories
 .serverless
+env.yml

@@ -1,0 +1,4 @@
+# 1. cp .pydistutils.cfg ~/
+# 2. pip install -t requirements/ -r requirements.txt
+# 3. rm ~/.pydistutils.cfg
+stravalib==0.6.6

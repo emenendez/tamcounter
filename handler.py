@@ -1,22 +1,78 @@
+import sys
+sys.path.append('requirements/')
+
+import itertools
 import json
+import os
 
-def hello(event, context):
-    body = {
-        "message": "Go Serverless v1.0! Your function executed successfully!",
-        "input": event
-    }
+import boto3
+from stravalib.client import Client
 
-    response = {
-        "statusCode": 200,
-        "body": json.dumps(body)
-    }
 
-    return response
+settings = {
+    'segments': {
+        'by foot': {
+            'hike': [6094058],
+            'run': [6306193, 5604733],
+            'walk': [3462619],
+        },
+        'on wheels': {
+            'ride': [651728, 776000],
+        },
+    },
+}
 
-    # Use this code if you don't use the http event with the LAMBDA-PROXY integration
-    """
+
+def get_unique_activities(client, athlete_id, segments, extra_activity_ids=[]):
+    activities = set()
+    for segment_id in segments:
+        activities.update((effort.activity.external_id for effort in \
+            client.get_segment_efforts(segment_id=segment_id, athlete_id=athlete_id)))
+    activities.update(extra_activity_ids)
+    return activities
+
+
+# For authentication
+# authorize_url = client.authorization_url(client_id=os.getenv('STRAVA_CLIENT_ID'), redirect_uri='http://localhost:8282/authorized')
+# Have the user click the authorization URL, a 'code' param will be added to the redirect_uri
+def get_activity_counts(event, context):
+    client = Client()
+    usersTable = boto3.resource('dynamodb').Table('usersTable')
+    request = json.loads(event['body'])
+
+    if 'code' in request:
+        # Get a per-user access token
+        access_token = client.exchange_code_for_token(
+            client_id=os.getenv('STRAVA_CLIENT_ID'),
+            client_secret=os.getenv('STRAVA_CLIENT_SECRET'),
+            code=request['code'],
+        )
+
+        # Now store that access token in DynamoDB
+        athlete = client.get_athlete()
+
+        usersTable = boto3.resource('dynamodb').Table('usersTable')
+        item = {
+           'id': athlete.id,
+           'access_token': access_token,
+        }
+        usersTable.put_item(Item=item)
+
+    if 'athlete_id' in request:
+        item = usersTable.get_item(
+            Key={
+               'id': event.body,
+            }
+        )['Item']
+        client.access_token = item['access_token']
+
+    response = {}
+    for segment_category, segment_types in settings['segments'].iteritems():
+        response[segment_category] = get_unique_activities(client, item['id'],
+            itertools.chain.from_iterable(segment_types.itervalues()))
+        # TODO: add extra_activity_ids for each category
+
     return {
-        "message": "Go Serverless v1.0! Your function executed successfully!",
-        "event": event
+        "statusCode": 200,
+        "body": json.dumps(response)
     }
-    """
