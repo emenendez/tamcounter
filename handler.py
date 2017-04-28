@@ -26,10 +26,10 @@ settings = {
 def get_unique_activities(client, athlete_id, segments, extra_activity_ids=[]):
     activities = set()
     for segment_id in segments:
-        activities.update((effort.activity.external_id for effort in \
+        activities.update((effort.activity.id for effort in \
             client.get_segment_efforts(segment_id=segment_id, athlete_id=athlete_id)))
     activities.update(extra_activity_ids)
-    return activities
+    return list(activities)
 
 
 def get_activity_counts(event, context):
@@ -58,7 +58,7 @@ def get_activity_counts(event, context):
     if 'athlete' in request:
         item = usersTable.get_item(
             Key={
-               'id': request['athlete'],
+               'id': int(request['athlete']),
             }
         )['Item']
         client.access_token = item['access_token']
@@ -71,5 +71,8 @@ def get_activity_counts(event, context):
 
     return {
         "statusCode": 200,
+        "headers": {
+            "Access-Control-Allow-Origin": os.getenv("ORIGIN", "*"),
+        },
         "body": json.dumps(response)
     }

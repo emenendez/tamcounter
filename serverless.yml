@@ -20,10 +20,13 @@ service: tamcounter
 provider:
   name: aws
   runtime: python2.7
-#  stage: dev
+  stage: production
   region: us-west-2
   profile: personal
   environment: ${file(env.yml)}
+  protocol: "http"
+  domain: "tamcounter.com"
+  api_subdomain: "api"
   iamRoleStatements:
     - Effect: "Allow"
       Action:
@@ -43,17 +46,22 @@ provider:
 package:
   include:
     - requirements/**
-#  exclude:
-#    - exclude-me.py
-#    - exclude-me-dir/**
+  exclude:
+    - frontend/**
+    - node_modules/**
 
 functions:
   get_activity_counts:
     handler: handler.get_activity_counts
+    environment:
+      ORIGIN: "${self:provider.protocol}://${self:provider.domain}"
     events:
       - http:
           path: get_activity_counts
           method: post
+          cors:
+            origins:
+              - "${self:provider.protocol}://${self:provider.domain}"
 
 resources:
   Resources:
@@ -70,3 +78,11 @@ resources:
         ProvisionedThroughput:
           ReadCapacityUnits: 1
           WriteCapacityUnits: 1
+    pathmapping:
+        Type: AWS::ApiGateway::BasePathMapping
+        Properties:
+            BasePath: ""
+            DomainName: "${self:provider.api_subdomain}.${self:provider.domain}"
+            RestApiId:
+                Ref: ApiGatewayRestApi
+            # Stage: ${self:provider.stage}
