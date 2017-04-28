@@ -5,6 +5,7 @@ const browserSync = require('browser-sync').create();
 const del = require('del');
 const wiredep = require('wiredep').stream;
 const runSequence = require('run-sequence');
+var AWS = require('aws-sdk');
 
 const $ = gulpLoadPlugins();
 const reload = browserSync.reload;
@@ -182,9 +183,11 @@ gulp.task('default', () => {
 gulp.task('deploy', ['default'], () => {
   // create a new publisher
   const publisher = $.awspublish.create({
+    region: 'us-west-2',
     params: {
       'Bucket': 'tamcounter.com'
-    }
+    },
+    credentials: new AWS.SharedIniFileCredentials({profile: 'personal'}),
   });
 
   // define custom headers
