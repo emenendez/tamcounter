@@ -16,26 +16,34 @@ var parseQueryString = function( queryString ) {
     return params;
 };
 
+var updateUrl = function(athlete_id) {
+    window.history.replaceState(null, null, 'athlete/' + athlete_id);
+};
+
 (function () {
     var params = parseQueryString(window.location.search);
 
     if (params.code || params.athlete) {
         // request api with params
         d3.json(settings.api_uri).post(JSON.stringify(params), function(error, response) {
-            for (var category in response) {
+            for (var category in response.activities) {
                 var categoryElement = d3.select('#' + category);
                 // Set activity count
-                categoryElement.select('.count').text(response[category].length);
+                categoryElement.select('.count').text(response.activities[category].length);
                 // Add activity dots
                 categoryElement.select('.activities')
                     .selectAll('a')
-                    .data(response[category])
+                    .data(response.activities[category])
                     .enter().append('a')
                         .attr('class', 'circle')
                         .attr('href', function(d) {
                             return 'https://www.strava.com/activities/' + d; });
             }
+            updateUrl(response.athlete_id);
         });
+        if (params.athlete) {
+            updateUrl(params.athlete);
+        }
 
     }
     else {

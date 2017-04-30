@@ -69,9 +69,12 @@ def get_activity_counts(event, context):
         client.access_token = item['access_token']
 
     # Calculate the Tamcount
-    response = {}
+    response = {
+        'athlete_id': int(item['id']),
+        'activities': {},
+    }
     for segment_category, segment_types in settings['segments'].iteritems():
-        response[segment_category] = get_unique_activities(
+        response['activities'][segment_category] = get_unique_activities(
             client,
             item['id'],
             itertools.chain.from_iterable(segment_types.itervalues()),
