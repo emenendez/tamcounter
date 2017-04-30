@@ -34,29 +34,30 @@ div.callout {
   background-color: rgba(255, 255, 255, 0.7);
 }
 
+// TODO: Find a better way to show callouts
 // If screen is not too short or too narrow, show the callouts above their respective mountain points
-#by_foot {
-  top: 5%;
-  left: 23.8%;
-}
+// #by_foot {
+//   top: 5%;
+//   left: 23.8%;
+// }
 
-#on_wheels {
-  top: 20%;
-  left: 29.5%;
-}
+// #on_wheels {
+//   top: 20%;
+//   left: 29.5%;
+// }
 
 // If screen is too short, show the callouts side-by-side
-@media (max-height: 600px) {
+// @media (max-height: 600px) {
   #by_foot {
-    top: 5%;
+    top: 15%;
     left: 34%;
   }
 
   #on_wheels {
-    top: 5%;
+    top: 15%;
     left: 66%;
   }
-}
+// }
 
 // If screen is too narrow, show the callouts horizontally centered
 @media (max-width: 700px) {
