@@ -72,11 +72,26 @@ div.callout {
 }
 
 div.count {
-  font-size: 60px;
   float: left;
   margin: 0 8px;
+  font-size: 60px;
 }
 
 div.category {
   margin-top: 12px;
+}
+
+div.activities {
+  height: 30px;
+  margin-right: 8px;
+  overflow: scroll;
+}
+
+a.circle {
+  display: inline-block;
+  border-radius: 50%;
+  background-color: #000;
+  width: 13px;
+  height: 13px;
+  margin-right: 3px;
 }

@@ -23,7 +23,17 @@ var parseQueryString = function( queryString ) {
         // request api with params
         d3.json(settings.api_uri).post(JSON.stringify(params), function(error, response) {
             for (var category in response) {
-                d3.select('#' + category + ' .count').text(response[category].length)
+                var categoryElement = d3.select('#' + category);
+                // Set activity count
+                categoryElement.select('.count').text(response[category].length);
+                // Add activity dots
+                categoryElement.select('.activities')
+                    .selectAll('a')
+                    .data(response[category])
+                    .enter().append('a')
+                        .attr('class', 'circle')
+                        .attr('href', function(d) {
+                            return 'https://www.strava.com/activities/' + d; });
             }
         });
 
