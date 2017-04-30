@@ -22,7 +22,9 @@ var parseQueryString = function( queryString ) {
     if (params.code || params.athlete) {
         // request api with params
         d3.json(settings.api_uri).post(JSON.stringify(params), function(error, response) {
-            d3.select('.hero-unit p').text(JSON.stringify(response))
+            for (var category in response) {
+                d3.select('#' + category + ' .count').text(response[category].length)
+            }
         });
 
     }

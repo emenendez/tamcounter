@@ -12,20 +12,71 @@ body {
   background: #fafafa;
   font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
   color: #333;
+  border: 0;
+  margin: 0;
+  padding: 0;
 }
 
-.hero-unit {
-  margin: 50px auto 0 auto;
-  width: 300px;
-  font-size: 18px;
-  font-weight: 200;
-  line-height: 30px;
-  background-color: #eee;
-  border-radius: 6px;
-  padding: 60px;
-  h1 {
-    font-size: 60px;
-    line-height: 1;
-    letter-spacing: -1px;
+#tam {
+  width: 100%;
+  position: absolute;
+  overflow: hidden;
+  bottom: 0px;
+  left: 0px;
+}
+
+div.callout {
+  position: absolute;
+  border: 1px solid #000;
+  width: 200px;
+  margin-left: -100px;
+  font-size: 14px;
+  background-color: rgba(255, 255, 255, 0.7);
+}
+
+// If screen is not too short or too narrow, show the callouts above their respective mountain points
+#by_foot {
+  top: 5%;
+  left: 23.8%;
+}
+
+#on_wheels {
+  top: 20%;
+  left: 29.5%;
+}
+
+// If screen is too short, show the callouts side-by-side
+@media (max-height: 600px) {
+  #by_foot {
+    top: 5%;
+    left: 34%;
   }
+
+  #on_wheels {
+    top: 5%;
+    left: 66%;
+  }
+}
+
+// If screen is too narrow, show the callouts horizontally centered
+@media (max-width: 700px) {
+  #by_foot {
+    top: 70px;
+    left: 50%;
+  }
+
+  #on_wheels {
+    top: 170px;
+    left: 50%;
+  }
+}
+
+div.count {
+  font-size: 60px;
+  float: left;
+  margin: 0 8px;
+}
+
+div.category {
+  margin-top: 12px;
 }

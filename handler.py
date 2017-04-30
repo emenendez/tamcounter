@@ -11,12 +11,12 @@ from stravalib.client import Client
 
 settings = {
     'segments': {
-        'by foot': {
+        'by_foot': {
             'hike': [6094058],
             'run': [6306193, 5604733],
             'walk': [3462619],
         },
-        'on wheels': {
+        'on_wheels': {
             'ride': [651728, 776000],
         },
     },
