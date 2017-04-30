@@ -23,6 +23,32 @@ settings = {
 }
 
 
+class UsersTable(object):
+    def __init__(self):
+        self.table = boto3.resource('dynamodb').Table('usersTable')
+
+    def get(self, id):
+        return self.table.get_item(
+            Key={
+               'id': int(id),
+            },
+            ReturnConsumedCapacity='NONE',
+        ).get('Item')
+
+    def update(self, id, access_token):
+        return self.table.update_item(
+            Key={
+                'id': int(id),
+            },
+            UpdateExpression='SET access_token = :access_token',
+            ExpressionAttributeValues={
+                ':access_token': access_token,
+            },
+            ReturnValues='ALL_NEW',
+            ReturnConsumedCapacity='NONE',
+        ).get('Attributes')
+
+
 def get_unique_activities(client, athlete_id, segments, extra_activity_ids=[]):
     activities = set()
     for segment_id in segments:
@@ -34,7 +60,7 @@ def get_unique_activities(client, athlete_id, segments, extra_activity_ids=[]):
 
 def get_activity_counts(event, context):
     client = Client()
-    usersTable = boto3.resource('dynamodb').Table('usersTable')
+    usersTable = UsersTable()
     request = json.loads(event['body'])
 
     if 'code' in request:
@@ -50,22 +76,13 @@ def get_activity_counts(event, context):
         # TODO: Modify stravalib to get this directly from the api call above
         athlete = client.get_athlete()
 
-        # Now store that access token in DynamoDB
-        usersTable = boto3.resource('dynamodb').Table('usersTable')
-        item = {
-           'id': athlete.id,
-           'access_token': access_token,
-        }
-        usersTable.put_item(Item=item)
+        # Now store that access token in DynamoDB. Update to make sure we don't
+        # overwrite any extra attributes for existing users.
+        item = usersTable.update(id=athlete.id, access_token=access_token)
 
     if 'athlete' in request:
         # Retreive the athlete-specific access token.
-        item = usersTable.get_item(
-            Key={
-               'id': int(request['athlete']),
-            },
-            ReturnConsumedCapacity='NONE',
-        )['Item']
+        item = usersTable.get(request['athlete'])
         client.access_token = item['access_token']
 
     # Calculate the Tamcount

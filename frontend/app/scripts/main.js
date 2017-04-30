@@ -17,7 +17,7 @@ var parseQueryString = function( queryString ) {
 };
 
 var updateUrl = function(athlete_id) {
-    window.history.replaceState(null, null, 'athlete/' + athlete_id);
+    window.history.replaceState(null, null, '/athlete/' + athlete_id);
 };
 
 (function () {
