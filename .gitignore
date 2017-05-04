@@ -15,6 +15,7 @@ var/
 *.egg-info/
 .installed.cfg
 *.egg
+*.pyc
 
 # Node
 node_modules/
@@ -25,3 +26,5 @@ requirements/
 # Serverless directories
 .serverless
 env.yml
+
+test.py

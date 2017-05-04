@@ -21,25 +21,38 @@ var updateUrl = function(athlete_id) {
 };
 
 (function () {
+    Raven.config('https://86428fc26eb146c3ba69848d1ca01d46@sentry.io/164686').install()
+
     var params = parseQueryString(window.location.search);
 
     if (params.code || params.athlete) {
         // request api with params
         d3.json(settings.api_uri).post(JSON.stringify(params), function(error, response) {
-            for (var category in response.activities) {
-                var categoryElement = d3.select('#' + category);
-                // Set activity count
-                categoryElement.select('.count').text(response.activities[category].length);
-                // Add activity dots
-                categoryElement.select('.activities')
-                    .selectAll('a')
-                    .data(response.activities[category])
-                    .enter().append('a')
-                        .attr('class', 'circle')
-                        .attr('href', function(d) {
-                            return 'https://www.strava.com/activities/' + d; });
+            if (error) {
+                d3.select('.callout').classed('hidden', true);
+                d3.select('#error').classed('hidden', false);
+            } else {
+                for (var category in response.activities) {
+                    var categoryElement = d3.select('#' + category);
+                    // Set activity count
+                    categoryElement.select('.count').text(response.activities[category].length);
+                    // Add activity dots
+                    categoryElement.select('.activities')
+                        .selectAll('a')
+                        .data(response.activities[category].filter(function(element) {
+                            return !element.private;
+                        }))
+                        .enter().append('a')
+                            .attr('class', 'tower')
+                            .attr('href', function(d) {
+                                return 'https://www.strava.com/activities/' + d.id;
+                            })
+                            .attr('title', function(d) {
+                                return d.start_date_local ? ( d.start_date_local + ( d.name ? ': ' + d.name : '' ) ) : '';
+                            });
+                }
+                updateUrl(response.athlete_id);
             }
-            updateUrl(response.athlete_id);
         });
         if (params.athlete) {
             updateUrl(params.athlete);
