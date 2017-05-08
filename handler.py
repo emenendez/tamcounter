@@ -5,6 +5,8 @@ import itertools
 import json
 import threading
 import os
+import pickle
+import time
 from collections import defaultdict
 from decimal import Decimal
 
@@ -26,6 +28,7 @@ settings = {
             'ride': [651728, 776000],
         },
     },
+    'cache_lifetime_seconds': 60*60,
 }
 
 
@@ -41,15 +44,15 @@ class UsersTable(object):
             ReturnConsumedCapacity='NONE',
         ).get('Item')
 
-    def update(self, id, access_token):
+    def update(self, id, **kwargs):
         return self.table.update_item(
             Key={
                 'id': int(id),
             },
-            UpdateExpression='SET access_token = :access_token',
+            UpdateExpression='SET ' + \
+                ', '.join(['{0} = :{0}'.format(key) for key in kwargs]),
             ExpressionAttributeValues={
-                ':access_token': access_token,
-            },
+                ':{}'.format(key): val for key, val in kwargs.iteritems() },
             ReturnValues='ALL_NEW',
             ReturnConsumedCapacity='NONE',
         ).get('Attributes')
@@ -119,28 +122,42 @@ def get_activity_counts(event, context):
         # Set the athlete ID on the Strava client
         strava.athlete_id = item['id']
 
-        # Get efforts for each segment
-        activities = defaultdict(set)
-        threads = []
-        for category, types in settings['segments'].iteritems():
-            for segment_id in itertools.chain.from_iterable(types.itervalues()):
-                threads.append(threading.Thread(
-                    target=strava.get_segment_efforts,
-                    args=( activities[category], segment_id)))
-                threads[-1].start()
-            # Add extra activities
-            activities[category].update(
-                map(Activity, item.get('extra_' + category, [])))
+        # Check for cache hit here
+        if Decimal(time.time()) - item.get('cache_time', 0) < settings['cache_lifetime_seconds']:
+            sorted_activities = pickle.loads(item['cache_value'].decode('base64'))
+        else:
+            # Get efforts for each segment
+            activities = defaultdict(set)
+            threads = []
+            for category, types in settings['segments'].iteritems():
+                for segment_id in itertools.chain.from_iterable(types.itervalues()):
+                    threads.append(threading.Thread(
+                        target=strava.get_segment_efforts,
+                        args=( activities[category], segment_id)))
+                    threads[-1].start()
+                # Add extra activities
+                activities[category].update(
+                    map(Activity, item.get('extra_' + category, [])))
 
-        # Wait for all threads to finish
-        for t in threads:
-            t.join()
+            # Wait for all threads to finish
+            for t in threads:
+                t.join()
+
+            # Convert sets to lists and sort
+            sorted_activities = { category: sorted(efforts) for category, efforts
+                                in activities.iteritems() }
+
+            # Cache the result
+            usersTable.update(
+                id=strava.athlete_id,
+                cache_time=Decimal(time.time()),
+                cache_value=pickle.dumps(sorted_activities).encode('base64'),
+                )
 
         # Assemble the response
         response = {
             'athlete_id': strava.athlete_id,
-            'activities': { category: sorted(efforts) for category, efforts
-                            in activities.iteritems() },
+            'activities': sorted_activities,
         }
 
         return {
@@ -152,4 +169,7 @@ def get_activity_counts(event, context):
         }
 
     except Exception:
-        client.captureException()
+        if os.getenv('RAVEN_DSN'):
+            raven.captureException()
+        else:
+            raise
