@@ -1,7 +1,10 @@
 var settings = {
-    'oauth_uri': 'https://www.strava.com/oauth/authorize?client_id=6518&redirect_uri=http://tamcounter.com/&response_type=code&scope=view_private',
-    'api_uri': 'https://api.tamcounter.com/get_activity_counts',
-}
+    'scheme': 'http://',
+    'domain': 'tamcounter.com',
+};
+settings.oauth_uri = 'https://www.strava.com/oauth/authorize?client_id=6518&redirect_uri=' +
+                     settings.scheme + settings.domain + '/&response_type=code&scope=view_private';
+settings.apu_uri = 'https://api.tamcounter.com/get_activity_counts';
 
 // Thank you https://www.joezimjs.com/javascript/3-ways-to-parse-a-query-string-in-a-url/
 var parseQueryString = function( queryString ) {
@@ -17,7 +20,9 @@ var parseQueryString = function( queryString ) {
 };
 
 var updateUrl = function(athlete_id) {
-    window.history.replaceState(null, null, '/athlete/' + athlete_id);
+    var path = '/athlete/' + athlete_id;
+    window.history.replaceState(null, null, path);
+    d3.select('.fb-share-button').attr('data-href', settings.scheme + settings.domain + path);
 };
 
 (function () {

@@ -18,6 +18,16 @@
     <link rel="stylesheet" href="/styles/main.css">
     <!-- endbuild -->
     
+    <meta property="og:url" content="http://tamcounter.com" />
+    <meta property="og:type" content="website" />
+    <meta name="twitter:card" content="summary" />
+    <meta name="twitter:site" content="@ericrmenendez" />
+    <meta property="og:title"  content="TamCounter" />
+    <meta name="twitter:title" content="TamCounter" />
+    <meta property="og:description"  content="Track and share your visit to the bay's greatest mountain." />
+    <meta name="twitter:description" content="Track and share your visit to the bay's greatest mountain." />
+    <meta property="og:image"  content="http://tamcounter.com/apple-touch-icon.png" />
+    <meta name="twitter:image" content="http://tamcounter.com/apple-touch-icon.png" />
   </head>
   <body>
     <!--[if IE]>
@@ -48,6 +58,33 @@
         <div class="facebook"><div class="fb-share-button" data-href="http://tamcounter.com/" data-layout="button_count" data-size="large"></div></div>
       </div>
     </div>
+
+    <script>
+      window.twttr = (function(d, s, id) {
+      var js, fjs = d.getElementsByTagName(s)[0],
+        t = window.twttr || {};
+      if (d.getElementById(id)) return t;
+      js = d.createElement(s);
+      js.id = id;
+      js.src = "https://platform.twitter.com/widgets.js";
+      fjs.parentNode.insertBefore(js, fjs);
+      t._e = [];
+      t.ready = function(f) {
+        t._e.push(f);
+      };
+      return t;
+      }(document, "script", "twitter-wjs"));
+    </script>
+    <div id="fb-root"></div>
+    <script>
+      (function(d, s, id) {
+      var js, fjs = d.getElementsByTagName(s)[0];
+      if (d.getElementById(id)) return;
+      js = d.createElement(s); js.id = id;
+      js.src = "//connect.facebook.net/en_US/sdk.js#xfbml=1&version=v2.9";
+      fjs.parentNode.insertBefore(js, fjs);
+      }(document, 'script', 'facebook-jssdk'));
+    </script>
     <script>
       (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
       (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
