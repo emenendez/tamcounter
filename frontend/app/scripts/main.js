@@ -29,7 +29,7 @@ var updateUrl = function(athlete_id) {
         // request api with params
         d3.json(settings.api_uri).post(JSON.stringify(params), function(error, response) {
             if (error) {
-                d3.select('.callout').classed('hidden', true);
+                d3.selectAll('.callouts > div').classed('hidden', true);
                 d3.select('#error').classed('hidden', false);
             } else {
                 for (var category in response.activities) {
