@@ -4,7 +4,7 @@ var settings = {
 };
 settings.oauth_uri = 'https://www.strava.com/oauth/authorize?client_id=6518&redirect_uri=' +
                      settings.scheme + settings.domain + '/&response_type=code&scope=view_private';
-settings.apu_uri = 'https://api.tamcounter.com/get_activity_counts';
+settings.api_uri = 'https://api.tamcounter.com/get_activity_counts';
 
 // Thank you https://www.joezimjs.com/javascript/3-ways-to-parse-a-query-string-in-a-url/
 var parseQueryString = function( queryString ) {
@@ -19,10 +19,33 @@ var parseQueryString = function( queryString ) {
     return params;
 };
 
-var updateUrl = function(athlete_id) {
+var updateUrl = function(athlete_id, add_social_buttons) {
     var path = '/athlete/' + athlete_id;
+    var uri = settings.scheme + settings.domain + path;
+
     window.history.replaceState(null, null, path);
-    d3.select('.fb-share-button').attr('data-href', settings.scheme + settings.domain + path);
+
+    d3.select('link[rel=canonical]').attr('href', uri);
+    d3.select('meta[property="og:url"]').attr('content', uri);
+
+    if (add_social_buttons) {
+        d3.select('.twitter').append('a')
+            .attr('class', 'twitter-share-button')
+            .attr('href', 'https://twitter.com/intent/tweet?text=See%20my%20#Tamcount:')
+            .attr('data-size', 'large');
+        if (window.twttr && window.twttr.widgets) {
+            window.twttr.widgets.load();
+        }
+
+        d3.select('.facebook').append('div')
+            .attr('class', 'fb-share-button')
+            .attr('data-href', uri)
+            .attr('data-layout', 'button_count')
+            .attr('data-size', 'large');
+        if (window.FB && window.FB.XFBML) {
+            window.FB.XFBML.parse();
+        }
+    }
 };
 
 (function () {
@@ -56,13 +79,12 @@ var updateUrl = function(athlete_id) {
                                 return d.start_date_local ? ( d.start_date_local + ( d.name ? ': ' + d.name : '' ) ) : '';
                             });
                 }
-                updateUrl(response.athlete_id);
+                updateUrl(response.athlete_id, true);
             }
         });
         if (params.athlete) {
-            updateUrl(params.athlete);
+            updateUrl(params.athlete, false);
         }
-
     }
     else {
         // redirect to strava oauth
