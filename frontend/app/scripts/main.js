@@ -88,7 +88,7 @@ var updateUrl = function(athlete_id, add_social_buttons) {
     }
     else {
         // redirect to strava oauth
-        window.location = settings.oauth_uri;
+        // window.location = settings.oauth_uri;
     }
 
 }());
